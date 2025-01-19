@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nehir Kozmetik</title>   
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Modal kontrolü
+        function openModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        // Hakkımızda Modalı
+        function openAboutModal() {
+            document.getElementById('aboutModal').style.display = 'block';
+        }
+
+        function closeAboutModal() {
+            document.getElementById('aboutModal').style.display = 'none';
+        }
+
+        // Sepete ürün ekleme
+        let cart = [];
+        const shippingFee = 50; // Kargo bedeli
+
+        function addToCart(productName, productPrice) {
+            const product = { name: productName, price: productPrice };
+            cart.push(product);
+            updateCart();
+            openCart(); // Sepet modalını aç
+        }
+
+        function removeFromCart(productName) {
+            cart = cart.filter(item => item.name !== productName);
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            cartItems.innerHTML = '';
+            let totalPrice = 0;
+            cart.forEach(item => {
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+                cartItem.innerHTML = `
+                    <p>${item.name} - ₺${item.price}</p>
+                    <button onclick="removeFromCart('${item.name}')">Çıkar</button>
+                `;
+                cartItems.appendChild(cartItem);
+                totalPrice += item.price;
+            });
+            // Sepet toplamını güncelle
+            document.getElementById('totalPrice').innerText = totalPrice;
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').style.display = 'block';
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        // Ödeme seçeneklerini açma
+        function openPaymentOptions() {
+            document.getElementById('paymentModal').style.display = 'block';
+            // Ödenecek toplam tutarı ve kargo bedelini hesapla
+            const totalPrice = cart.reduce((sum, product) => sum + product.price, 0);
+            const finalPrice = totalPrice + shippingFee;
+            document.getElementById('finalTotalPrice').innerText = finalPrice;
+        }
+
+        function closePaymentOptions() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        // Ödeme onayı
+        function confirmPayment() {
+            const currency = document.querySelector('input[name="payment"]:checked').value;
+            const totalAmount = parseFloat(document.getElementById('finalTotalPrice').innerText);
+            let paymentMessage = `Ödeme başarılı! Ödenen Tutar: ₺${totalAmount}`;
+            if (currency === 'coin') {
+                paymentMessage = `Ödeme başarılı! Coin ile ödeme yapıldı: ₺${totalAmount}`;
+            } else if (currency === 'usdt') {
+                paymentMessage = `Ödeme başarılı! USDT ile ödeme yapıldı: ₺${totalAmount}`;
+            }
+
+            alert(paymentMessage); // Ödeme mesajı
+            closePaymentOptions(); // Ödeme modali kapatma
+            closeCart(); // Sepet modali kapatma
+        }
+
+        // Ödemeyi iptal et
+        function cancelPayment() {
+            const cancelMessage = "Ödeme işlemini iptal ettiniz.";
+            alert(cancelMessage); // İptal mesajı
+            closePaymentOptions(); // Ödeme modali kapatma
+            closeCart(); // Sepet modali kapatma
+        }
+
+        // Sayfada ilgili bölüme scroll etme
+        function scrollToSection(sectionId) {
+            document.querySelector(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+    <script>
+        // Chatbot durumunu kontrol etmek için bir değişken
+        let chatbotOpen = false;
+    
+        // Chatbot'u açma/kapama işlevi
+        function toggleChatbot() {
+            const chatbotWindow = document.getElementById('chatbotWindow');
+            chatbotOpen = !chatbotOpen;
+            chatbotWindow.style.display = chatbotOpen ? 'block' : 'none';
+        }
+    
+        // Kullanıcının mesajını göndermek
+        function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const chatArea = document.getElementById('chatArea');
+    
+            const userMessage = chatInput.value.trim();
+            if (userMessage === '') return;
+    
+            // Kullanıcı mesajını göster
+            const userMessageElement = document.createElement('div');
+            userMessageElement.className = 'user-message';
+            userMessageElement.textContent = `Siz: ${userMessage}`;
+            chatArea.appendChild(userMessageElement);
+    
+            chatInput.value = ''; // Giriş kutusunu temizle
+    
+            // Chatbot yanıtını bekleyip gösterme
+            setTimeout(() => {
+                const botMessageElement = document.createElement('div');
+                botMessageElement.className = 'bot-message';
+                botMessageElement.textContent = `Chatbot: ${generateResponse(userMessage)}`;
+                chatArea.appendChild(botMessageElement);
+    
+                // Otomatik kaydırma
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 500);
+        }
+    
+        // Chatbot'un basit yanıtlarını oluşturma
+        function generateResponse(message) {
+            const lowerMessage = message.toLowerCase();
+    
+            // Örnek yanıtlar
+            if (lowerMessage.includes('merhaba')) {
+                return 'Merhaba! Size nasıl yardımcı olabilirim?';
+            } else if (lowerMessage.includes('ürün')) {
+                return 'Ürünlerimiz hakkında bilgi mi almak istiyorsunuz?';
+            } else if (lowerMessage.includes('fiyat')) {
+                return 'Fiyat bilgisi için lütfen ürünlerimiz kısmına göz atın.';
+            } else {
+                return 'Bu konuda size yardımcı olamam. Lütfen başka bir şey sorun.';
+            }
+        }
+    </script>
+    
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>Nehir Kozmetik</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="#home">Anasayfa</a></li>
+                    <li><a href="#products">Ürünler</a></li>
+                    <li><a href="#discount-products">İndirimler</a></li>
+                    <li><a href="#contactModal" onclick="openModal()">İletişim</a></li>
+                    <li><a href="#about" onclick="openAboutModal()">Hakkımızda</a></li>
+                    <li><a href="#orderTracking">Sipariş Takip</a></li>
+                    <li><a href="login.html">Giriş Yap</a></li>
+                    <li><a href="#" onclick="openCart()">Sepet</a></li>
+                    <li class="night-mode">
+                        <button onclick="toggleDarkMode()">🌙 Gece Modu</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="home" class="hero-section">
+        <div class="hero-content">
+            <h2>Hoşgeldiniz</h2>
+            <p>Kozmetik dünyasında fark yaratıyoruz.</p>
+            <button onclick="scrollToSection('#products')">Ürünlere Göz At</button>
+        </div>
+    </section>
+
+    <section id="search-section">
+        <input type="text" id="search-bar" placeholder="Ürün Ara...">
+        <button onclick="searchProducts()">Ara</button>
+    </section>
+    
+    <section id="products" class="section">
+        <h2>Ürünlerimiz</h2>
+        <div class="product-grid">
+            <div class="product-card">
+                <img src="krmızı ruj.jpg" alt="Kırmızı Ruj">
+                <h3>Kırmızı Ruj</h3>
+                <p>₺800</p>
+                <button onclick="addToCart('Kırmızı Ruj', 800)">Sepete Ekle</button>
+            </div>
+            <div class="product-card">
+                <img src="Nemlendrici Krem.jpg" alt="Nemlendirici Krem">
+                <h3>Nemlendirici Krem</h3>
+                <p>₺1000</p>
+                <button onclick="addToCart('Nemlendirici Krem', 1000)">Sepete Ekle</button>
+            </div>
+            <div class="product-card">
+                <img src="Bleu parfum - Maskim Kompozit.jpg" alt="Nemlendirici Krem">
+                <h3>Nemlendirici Krem</h3>
+                <p>₺1000</p>
+                <button onclick="addToCart('Bleu parfum - Maskim Kompozit', 1000)">Sepete Ekle</button>
+            </div>
+            <div class="product-card">
+                <img src="CİLT BAKIMI - Yves Rocher.webp" alt="Nemlendirici Krem">
+                <h3>Nemlendirici Krem</h3>
+                <p>₺1000</p>
+                <button onclick="addToCart('CİLT BAKIMI - Yves Rocher.webpt', 9000)">Sepete Ekle</button>
+            </div>
+            <div class="product-card">
+                <img src="EAU DE Parfüm kadın.avif" alt="Nemlendirici Krem">
+                <h3>Nemlendirici Krem</h3>
+                <p>₺1000</p>
+                <button onclick="addToCart('EAU DE Parfüm kadın.avif', 3000)">Sepete Ekle</button>
+            </div>
+            <div class="product-card">
+                <img src="L'Oréal Paris Revitalift Cilt Bakım Rutini Seti.jpg" alt="Nemlendirici Krem">
+                <h3>Nemlendirici Krem</h3>
+                <p>₺1000</p>
+                <button onclick="addToCart('LOréal Paris Revitalift Cilt Bakım Rutini Seti', 900)">Sepete Ekle</button>
+            </div>
+        </div>
+        <div class="product-card">
+            <img src="Smell Parfüm.jpg" alt="Nemlendirici Krem">
+            <h3>Nemlendirici Krem</h3>
+            <p>₺1000</p>
+            <button onclick="addToCart('Smell Parfüm', 3000)">Sepete Ekle</button>
+        </div>
+        </div>
+        <div class="product-card">
+            <img src="Yüz Kapatıcı Makyaj HD Fotojenik Kapatıcı Krem Tam Kapsama Vakıf Altında Göz Kapatıcı Koyu Halkalar.jpeg" alt="Nemlendirici Krem">
+            <h3>Nemlendirici Krem</h3>
+            <p>₺1000</p>
+            <button onclick="addToCart('Yüz Kapatıcı Makyaj HD Fotojenik Kapatıcı Krem Tam Kapsama Vakıf Altında Göz Kapatıcı Koyu Halkalar', 1500)">Sepete Ekle</button>
+        </div>
+    </section>
+
+    <!-- Sepet Modalı -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCart()">&times;</span>
+            <h2>Sepetiniz</h2>
+            <div id="cartItems"></div>
+            <div id="cartTotal">
+                <p>Toplam Fiyat: ₺<span id="totalPrice">0</span></p>
+            </div>
+            <button onclick="openPaymentOptions()">Ödeme Yap</button>
+        </div>
+    </div>
+
+    <!-- Ödeme Seçenekleri Modalı -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePaymentOptions()">&times;</span>
+            <h2>Ödeme Seçenekleri</h2>
+            <form>
+                <label><input type="radio" name="payment" value="creditCard"> Kredi Kartı</label><br>
+                <label><input type="radio" name="payment" value="bankTransfer"> Banka Transferi</label><br>
+                <label><input type="radio" name="payment" value="usdt"> USDT (Kripto)</label><br>
+                <label><input type="radio" name="payment" value="coin"> Coin Ödemesi</label><br>
+                <label><input type="radio" name="payment" value="borsa"> Borsa Ödemesi</label><br>
+                <div>
+                    <p>Toplam Ödenecek: ₺<span id="finalTotalPrice">0</span></p>
+                    <p>Kargo Bedeli: ₺<span id="shippingFee">50</span></p>
+                </div>
+                <button type="button" onclick="confirmPayment()">Ödeme Yap</button>
+                <button type="button" onclick="cancelPayment()">Ödemeyi İptal Et</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hakkımızda Modalı -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAboutModal()">&times;</span>
+            <h2>Hakkımızda</h2>
+            <p>Biz, Nehir Kozmetik olarak en kaliteli kozmetik ürünlerini sizlerle buluşturmayı amaçlıyoruz. Müşteri memnuniyetini ön planda tutarak, her zaman en iyi hizmeti sunmayı hedefliyoruz.</p>
+            <p>Ürünlerimiz, en son trendlerle uyumlu, kaliteli ve güvenli içeriklerle üretilmektedir. Amacımız, güzellik ve bakım ihtiyaçlarınıza en iyi şekilde cevap verebilmektir.</p>
+            <button onclick="closeAboutModal()">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>İletişim Formu</h2>
+            <!-- İletişim Bilgileri -->
+            <div class="contact-info">
+                <p><strong>Telefon:</strong> +90 553 932 45 92</p>
+                <p><strong>E-posta:</strong> murad.edu.tm@gmail.com.</p>
+                <p><strong>Adres:</strong> Daşoguz, Bay bazar  Türkmenistan</p>
+            </div>
+
+            <!-- İletişim Formu -->
+            <form action="send-message.php" method="POST">
+                <input type="text" name="name" placeholder="Adınız" required>
+                <input type="email" name="email" placeholder="E-posta" required>
+                <textarea name="message" placeholder="Mesajınız" required></textarea>
+                <button type="submit">Gönder</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        // Gece modu fonksiyonu
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+        }
+    </script>
+<script>
+    function searchProducts() {
+        const searchQuery = document.getElementById('search-bar').value.toLowerCase();
+        const products = document.querySelectorAll('.product-card');
+        products.forEach(product => {
+            const productName = product.querySelector('h3').innerText.toLowerCase();
+            if (productName.includes(searchQuery)) {
+                product.style.display = 'block';
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    }
+</script>
+<script>
+    // İletişim formu validasyonu
+    function validateForm() {
+        const name = document.querySelector('input[name="name"]').value;
+        const email = document.querySelector('input[name="email"]').value;
+        const message = document.querySelector('textarea[name="message"]').value;
+
+        if (!name || !email || !message) {
+            alert("Lütfen tüm alanları doldurun.");
+            return false;
+        }
+        return true;
+    }
+</script>
+
+<form action="send-message.php" method="POST" onsubmit="return validateForm()">
+    <input type="text" name="name" placeholder="Adınız" required>
+    <input type="email" name="email" placeholder="E-posta" required>
+    <textarea name="message" placeholder="Mesajınız" required></textarea>
+    <button type="submit">Gönder</button>
+</form>
+
+<div class="checkout">
+    <h2>Ödeme Bilgileri</h2>
+    <form id="checkout-form">
+        <label for="name">Adınız:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="address">Adresiniz:</label>
+        <input type="text" id="address" name="address" required>
+
+        <label for="payment-method">Ödeme Yöntemi:</label>
+        <select id="payment-method" name="payment-method">
+            <option value="credit-card">Kredi Kartı</option>
+            <option value="paypal">PayPal</option>
+            <option value="bank-transfer">Banka Havalesi</option>
+        </select>
+
+        <button type="submit">Ödemeyi Tamamla</button>
+    </form>
+</div>
+
+
+<label for="shipping-method">Kargo Seçeneği:</label>
+<select id="shipping-method" name="shipping-method">
+    <option value="standard">Standart Kargo</option>
+    <option value="express">Hızlı Kargo</option>
+    <option value="overnight">Gece Kargo</option>
+</select>
+<p id="shipping-cost">Kargo Ücreti: ₺0</p>
+<form id="checkout-form" onsubmit="completeOrder(); return false;">
+    <!-- Form Alanları Burada -->
+    <button type="submit">Ödemeyi Tamamla</button>
+</form>
+
+<div class="order-tracking">
+    <h2>Sipariş Takibi</h2>
+    <input type="text" id="order-id" placeholder="Sipariş Numarasını Girin">
+    <button onclick="trackOrder()">Siparişi Takip Et</button>
+    <p id="order-status"></p>
+</div>
+
+<script>
+    function trackOrder() {
+        const orderId = document.getElementById('order-id').value;
+        const status = orderId ? `Siparişinizin durumu: Hazırlanıyor (Sipariş ID: ${orderId})` : 'Lütfen geçerli bir sipariş numarası girin.';
+        document.getElementById('order-status').innerText = status;
+    }
+</script>
+<!-- Giriş Yap Modalı -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Giriş Yap</h2>
+        <form id="login-form" action="login.php" method="POST">
+            <input type="email" name="email" placeholder="E-posta" required>
+            <input type="password" name="password" placeholder="Şifre" required>
+            <button type="submit">Giriş Yap</button>
+        </form>
+        <p><a href="#" onclick="toggleSignup()">Hesap oluştur</a></p>
+    </div>
+</div>
+
+<!-- Kayıt Ol Modalı -->
+<div id="signupModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeSignup()">&times;</span>
+        <h2>Kayıt Ol</h2>
+        <form id="signup-form" action="signup.php" method="POST">
+            <input type="text" name="name" placeholder="Adınız" required>
+            <input type="email" name="email" placeholder="E-posta" required>
+            <input type="password" name="password" placeholder="Şifre" required>
+            <button type="submit">Kayıt Ol</button>
+        </form>
+        <p><a href="#" onclick="toggleLogin()">Zaten bir hesabınız var mı? Giriş yapın</a></p>
+    </div>
+</div>
+<div id="userPanel" style="display:none;">
+    <h2>Hesap Bilgileriniz</h2>
+    <p><strong>Ad:</strong> <span id="userName">John Doe</span></p>
+    <p><strong>E-posta:</strong> <span id="userEmail">john@example.com</span></p>
+    <button onclick="editProfile()">Profil Düzenle</button>
+    <button onclick="logout()">Çıkış Yap</button>
+</div>
+
+<!-- Şifre sıfırlama bağlantısı -->
+<p><a href="#" onclick="showPasswordReset()">Şifremi Unuttum</a></p>
+
+<!-- Şifre sıfırlama formu -->
+<div id="passwordReset" style="display:none;">
+    <h2>Şifre Sıfırlama</h2>
+    <form id="reset-form" action="reset-password.php" method="POST">
+        <input type="email" name="email" placeholder="E-posta adresiniz" required>
+        <button type="submit">Şifreyi Sıfırla</button>
+    </form>
+    <button onclick="closePasswordReset()">İptal</button>
+</div>
+<!-- WhatsApp Button -->
+<a href="https://wa.me/905539324592" target="_blank" class="whatsapp-button">
+    <img src="whatsapp-icon.png" alt="WhatsApp" />
+</a>
+
+<style>
+    .whatsapp-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #25d366;
+        border-radius: 50%;
+        padding: 15px;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .whatsapp-button img {
+        width: 40px;
+        height: 40px;
+    }
+</style>
+<!-- Chatbot Button -->
+<button class="chatbot-toggle" onclick="toggleChatbot()">💬 Can I Help You?</button>
+
+<!-- Chatbot Window -->
+<div id="chatbotWindow" class="chatbot-window" style="display: none;">
+    <div id="chatArea" class="chat-area"></div>
+    <input type="text" id="chatInput" placeholder="Mesajınızı yazın..." />
+    <button onclick="sendMessage()">Gönder</button>
+    <button onclick="toggleChatbot()">Kapat</button>
+</div>
+
+<style>
+    .chatbot-window {
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        width: 300px;
+        height: 400px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 5px 10px rgb(255, 255, 255);
+        display: none;
+    }
+
+    .chat-area {
+        height: 300px;
+        overflow-y: scroll;
+        border-bottom: 1px solid #ffffff;
+        margin-bottom: 10px;
+    }
+
+    .chatbot-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #0003bf;
+        color: rgb(255, 255, 255);
+        border: none;
+        padding: 15px;
+        border-radius: 50%;
+        font-size: 16px;
+    }
+
+    #chatInput {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="map-container">
+    <!-- Harita bağlantısı -->
+    <a href="https://maps.app.goo.gl/N4TsLWpwXewg4wnx6" target="_blank" class="map-link">
+      <span class="map-icon">🌍</span> Bay Bazar, Daşoğuz, Türkmenistan'ı görmek için tıklayın
+    </a>
+  
+    <!-- Google Maps Embed -->
+    <div class="map-frame">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12151.83504994211!2d59.9163357!3d41.7711542!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3fdf59ffbb2b92ad%3A0xb4e5909731a63b68!2zQmF5IFZhcmlvciwgRGFzaG9ndXosIFR1cmdtZW5pc3Rhbg!5e0!3m2!1str!2str!4v1673079891002!5m2!1str!2str" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+  </div>
+  <div class="social-media">
+    <a href="https://www.facebook.com/yourprofile" target="_blank" class="social-button facebook">Facebook</a>
+    <a href="https://twitter.com/yourprofile" target="_blank" class="social-button twitter">Twitter</a>
+    <a href="https://www.instagram.com/yourprofile" target="_blank" class="social-button instagram">Instagram</a>
+    <a href="https://www.linkedin.com/in/yourprofile" target="_blank" class="social-button linkedin">LinkedIn</a>
+  </div>
+  <div class="instagram-feed">
+    <iframe src="https://www.instagram.com/p/CdMfyFyD5QS/embed" width="400" height="480" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
+  </div>
+  <div class="hero-section">
+    <img src="high-quality-image.jpg" alt="Description of Image" class="hero-image">
+  </div>
+  <div class="share-buttons">
+    <a href="https://www.facebook.com/sharer/sharer.php?u={URL}" target="_blank" class="share-button facebook">Paylaş</a>
+    <a href="https://twitter.com/intent/tweet?url={URL}" target="_blank" class="share-button twitter">Tweetle</a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url={URL}" target="_blank" class="share-button linkedin">Paylaş</a>
+  </div>
+  <form id="contact-form" action="/submit-form" method="POST">
+    <label for="name">Adınız:</label>
+    <input type="text" id="name" name="name" required>
+  
+    <label for="email">E-posta:</label>
+    <input type="email" id="email" name="email" required>
+  
+    <label for="message">Mesajınız:</label>
+    <textarea id="message" name="message" required></textarea>
+  
+    <button type="submit">Gönder</button>
+  </form>
+  
+  <div class="scroll-fade">
+    <p>Bu öğe kaydırma ile görünecek.</p>
+  </div>
+            
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Web sitenizin kısa açıklaması.">
+    <meta name="keywords" content="web tasarım, modern, profesyonel, SEO">
+    <meta name="author" content="Adınız">
+    <meta property="og:title" content="Sitenizin Başlığı">
+    <meta property="og:description" content="Web sitenizin açıklaması.">
+    <meta property="og:image" content="image.jpg">
+    <meta property="og:url" content="https://www.sitenizinadresi.com">
+  </head>
+  
+</body>
+</html>
